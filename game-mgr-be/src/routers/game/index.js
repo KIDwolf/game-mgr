@@ -8,6 +8,17 @@ const GAME_CONST = {
 };
 
 const Game = mongoose.model('Game');
+const InventoryLog = mongoose.model('InventoryLog');
+
+const findGameOne = async (id) => {
+    const one = await Game.findOne({
+        _id: id,
+    }).exec();
+
+    return one;
+};
+
+
 
 const router = new Router({
     prefix: '/game',
@@ -62,6 +73,9 @@ router.get('/list', async (ctx) => {
 
     const list = await Game
         .find(query)
+        .sort({
+            _id: -1,
+        })
         .skip((page - 1) * size)
         .limit(size)
         .exec();
@@ -107,9 +121,7 @@ router.post('/update/count', async (ctx) => {
 
     num = Number(num);
 
-    const game = await Game.findOne({
-        _id: id,
-    }).exec();
+    const game = await findGameOne(id);
 
     if (!game) {
         ctx.body = {
@@ -136,6 +148,13 @@ router.post('/update/count', async (ctx) => {
 
     const res = await game.save();
 
+    const log = new InventoryLog({
+        num: Math.abs(num),
+        type,
+    });
+
+    log.save();
+
     ctx.body = {
         data: res,
         code: 1,
@@ -149,9 +168,7 @@ router.post('/update', async (ctx) => {
         ...others
     } = ctx.request.body;
 
-    const one = await Game.findOne({
-        _id: id,
-    }).exec();
+    const one = await findGameOne(id);
 
     //没有找到游戏的情况
     if (!one) {
@@ -180,6 +197,31 @@ router.post('/update', async (ctx) => {
         code: 1,
         msg: '保存成功',
     };
+});
+
+router.get('/detail/:id', async (ctx) => {
+    const {
+        id
+    } = ctx.params;
+
+    const one = await findGameOne(id);
+
+    //没有找到游戏的情况
+    if (!one) {
+        ctx.body = {
+            msg: '没有找到游戏',
+            code: 0,
+        };
+        return;
+    }
+
+    ctx.body = {
+        msg: '查询成功',
+        data: one,
+        code: 1,
+    }
+
+
 });
 
 

@@ -17,7 +17,7 @@
     <a v-if="isSearch" href="javascript:;" @click="backAll">返回</a>
     </div>
 
-    <a-button @click="show = true">添加一条</a-button>
+    <a-button @click="show = true" v-only-admin>添加一条</a-button>
     </space-between>
     
     <a-divider />
@@ -25,7 +25,8 @@
   <a-table 
   :columns="columns" 
   :data-source="list" 
-  :pagination="false">
+  :pagination="false"
+  bordered>
   <template #publishDate="data">
  {{ formatTimestamp(data.record.publishDate) }}
   </template>
@@ -37,9 +38,11 @@
   </template>
 
   <template #actions="record">
-  <a href="javascript:;" @click="update(record)">编辑</a>
+  <a href="javascript:;" @click="toDetail(record)">详情</a>
   &nbsp;
- <a href="javascript:;" @click="remove(record)">删除</a>
+  <a v-only-admin href="javascript:;" @click="update(record)">编辑</a>
+  &nbsp;
+ <a v-only-admin href="javascript:;" @click="remove(record)">删除</a>
   </template>
    </a-table>
    <space-between style="margin-top: 23px">
